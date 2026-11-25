@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="nb">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Båtsjekkliste</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:wght@400;600;700&display=swap">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Sjekkliste">
+<meta name="theme-color" content="#c8102e" id="themecolor">
+<link rel="apple-touch-icon" id="touchicon" href="">
+<style>
+:root{--accent:#c8102e;--on:#fff;--bg:#f3ede1;--card:#fff;--ink:#1d1d1f;--mute:#6b6b70;--line:#ddd5c5;--done:#2c7a5b;--warn:#b3261e;color-scheme:light;
+--ui:Futura,"Futura PT",Jost,"Century Gothic","Trebuchet MS",sans-serif}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:17px/1.45 var(--ui);-webkit-text-size-adjust:100%}
+button,input,textarea{font-family:var(--ui)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.top{background:var(--accent);color:var(--on);display:flex;align-items:center;justify-content:space-between;gap:12px;padding:calc(env(safe-area-inset-top,0px) + 14px) max(16px,calc((100% - 640px)/2 + 16px)) 14px}
+.top>div:first-child{min-width:0}
+.top h1{margin:0;font-weight:700;font-size:clamp(28px,9vw,44px);line-height:1.1}
+.top p{margin:2px 0 0;opacity:.92;font-size:clamp(12px,3.4vw,17px)}
+.right{display:flex;align-items:center;gap:6px;flex:none}
+.logo{background:#fff;border-radius:10px;padding:4px 6px;display:flex;align-items:center;justify-content:center;height:clamp(36px,10vw,48px)}
+.logo img{max-height:100%;max-width:92px;display:block}
+.burger{background:none;border:0;padding:10px;margin-right:-10px;display:flex;flex-direction:column;gap:5px;cursor:pointer;position:relative;z-index:30}
+.burger span{display:block;width:28px;height:3px;background:var(--on);transition:transform .2s,opacity .2s,background .2s}
+.burger[aria-expanded="true"] span{background:#1d1d1f}
+.burger[aria-expanded="true"] span:nth-child(1){transform:translateY(8px) rotate(45deg)}
+.burger[aria-expanded="true"] span:nth-child(2){opacity:0}
+.burger[aria-expanded="true"] span:nth-child(3){transform:translateY(-8px) rotate(-45deg)}
+#menu{position:fixed;top:0;right:0;bottom:0;width:min(310px,84vw);background:#fff;padding:calc(env(safe-area-inset-top,0px) + 76px) 16px calc(env(safe-area-inset-bottom,0px) + 16px);box-shadow:-4px 0 16px rgba(0,0,0,.25);transform:translateX(105%);visibility:hidden;transition:transform .2s,visibility .2s;z-index:20;overflow-y:auto;display:flex;flex-direction:column;gap:8px}
+#menu.open{transform:none;visibility:visible}
+.scrim{position:fixed;inset:0;background:rgba(0,0,0,.35);opacity:0;visibility:hidden;transition:opacity .2s,visibility .2s;z-index:10}
+.scrim.open{opacity:1;visibility:visible}
+.tab{text-align:left;padding:14px 16px;border:2px solid var(--accent);background:transparent;color:var(--ink);font-weight:700;font-size:21px;border-radius:8px;cursor:pointer;line-height:1.2}
+.tab[aria-selected="true"]{background:var(--accent);color:var(--on)}
+.tab.sm{border:0;font-size:17px;padding:10px 16px;font-weight:600}
+.tab.sm[aria-selected="true"]{background:var(--accent);color:var(--on)}
+.msep{height:1px;background:#e5e5e5;margin:8px 0}
+.mact{text-align:left;padding:12px 16px;border:0;background:#f1f1f1;color:var(--ink);font-size:17px;font-weight:600;border-radius:8px;cursor:pointer}
+main{max-width:640px;margin:0 auto;padding:20px 16px calc(env(safe-area-inset-bottom,0px) + 48px)}
+.curname{font-weight:700;font-size:28px;line-height:1.1;color:var(--atext,var(--accent));margin:0 0 10px}
+.prog{height:8px;background:var(--line);overflow:hidden;border-radius:4px}
+.prog i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s,background .25s}
+.prog.full i{background:var(--done)}
+.count{display:flex;justify-content:space-between;color:var(--mute);margin:6px 0 18px;font-size:15px}
+.done-msg{text-align:center;padding:14px;margin-bottom:14px;border:2px solid var(--done);border-radius:8px;color:var(--done);font-weight:600}
+.done-msg::after{--a:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22V8'/%3E%3Cpath d='M5 12H2a10 10 0 0 0 20 0h-3'/%3E%3Ccircle cx='12' cy='5' r='3'/%3E%3C/svg%3E");content:"";display:inline-block;width:1.15em;height:1.15em;margin-left:.45em;vertical-align:-.2em;background:currentColor;-webkit-mask:var(--a) center/contain no-repeat;mask:var(--a) center/contain no-repeat}
+section{background:var(--card);border-radius:14px;margin-bottom:14px;overflow:hidden;box-shadow:0 1px 3px rgba(60,50,30,.14)}
+section.pop{animation:flash .9s ease-out}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(44,122,91,.55)}100%{box-shadow:0 0 0 16px rgba(44,122,91,0)}}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.4)}100%{transform:scale(1)}}
+h2{font-weight:700;font-size:21px;margin:0;padding:14px 14px 10px;color:#2e3236}
+.gp{height:8px;margin:0 14px 4px;border-radius:4px;overflow:hidden;background:var(--line)}
+.gp i{display:block;height:100%;width:0;background:var(--accent);transition:width .25s,background .25s}
+.gp.full i{background:var(--done)}
+.item{display:flex;align-items:center;gap:12px;padding:0 14px;border-bottom:1px solid #eee;min-height:52px}
+.item:last-child{border-bottom:0}
+.item label{flex:1;display:flex;align-items:center;gap:12px;padding:12px 0;cursor:pointer}
+.item input[type=checkbox]{appearance:none;-webkit-appearance:none;width:26px;height:26px;border:2px solid #b9b2a3;border-radius:7px;background:#fff;flex:none;display:grid;place-content:center;cursor:pointer;margin:0;transition:background .2s,border-color .2s}
+.item input[type=checkbox]::after{content:"";width:6px;height:12px;border:solid var(--on);border-width:0 3px 3px 0;transform:rotate(45deg) scale(0);margin-top:-2px;transition:transform .15s}
+.item input[type=checkbox]:checked{background:var(--accent);border-color:var(--accent)}
+.item input[type=checkbox]:checked::after{transform:rotate(45deg) scale(1)}
+section.full .item input[type=checkbox]:checked{background:var(--done);border-color:var(--done)}
+section.full .item input[type=checkbox]::after{border-color:#fff}
+section.pop .item input[type=checkbox]:checked{animation:pop .5s ease both}
+.item input:checked+span{color:var(--mute);text-decoration:line-through}
+.btn{padding:11px 16px;border:0;border-radius:8px;background:var(--accent);color:var(--on);font-weight:600;font-size:16px;cursor:pointer}
+.btn.ghost{background:transparent;color:var(--ink);border:2px solid var(--line)}
+.btn.danger{background:transparent;color:var(--warn);border:2px solid var(--warn)}
+.btn.block{display:block;width:100%}
+.ib{width:38px;height:38px;border:1px solid var(--line);background:#fff;border-radius:8px;font-size:18px;cursor:pointer;color:var(--ink);flex:none;line-height:1}
+.ib.del{color:var(--warn)}
+.ib:disabled{opacity:.3;cursor:default}
+.edbar{background:#fff;border:2px dashed var(--accent);border-radius:12px;padding:12px 14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between}
+.edbar p{margin:0;font-size:15px;color:var(--mute)}
+.er{display:flex;gap:6px;align-items:center;padding:6px 10px;border-bottom:1px solid #eee}
+.er input[type=text]{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:16px;background:#fff;color:var(--ink)}
+.eh{padding:10px 10px 6px;display:flex;gap:6px;align-items:center}
+.eh input[type=text]{flex:1;min-width:0;padding:10px;border:1px solid var(--line);border-radius:8px;font-size:18px;font-weight:700;background:#fff;color:var(--ink)}
+.eadd{padding:10px}
+.empty{background:#fff;border-radius:14px;padding:22px;text-align:center;color:var(--mute)}
+.tools{padding:12px 14px;display:flex;flex-direction:column;gap:10px}
+.tools label.t{display:flex;gap:10px;align-items:center;font-size:16px}
+.tools .row{display:flex;gap:8px;flex-wrap:wrap}
+#splash{position:fixed;inset:0;background:var(--accent);color:var(--on);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;z-index:100;opacity:1;transition:opacity .7s ease;text-align:center;padding:24px}
+#splash.out{opacity:0;pointer-events:none}
+#splash .in{opacity:0;animation:sfade 1.1s ease .2s forwards;display:flex;flex-direction:column;align-items:center;gap:12px}
+#splash .card{background:#fff;border-radius:28px;padding:22px;max-width:min(66vw,320px)}
+#splash .card img{display:block;max-width:100%;max-height:42vh;width:auto;height:auto}
+#splash .nm{font-weight:700;font-size:clamp(34px,11vw,60px);line-height:1.1}
+#splash .md{font-size:clamp(15px,4vw,20px);opacity:.9}
+@keyframes sfade{to{opacity:1}}
+.wrap{position:fixed;inset:0;background:rgba(0,0,0,.5);overflow:auto;z-index:60;padding:calc(env(safe-area-inset-top,0px) + 16px) 12px 24px}
+.sheet{background:#fff;border-radius:16px;max-width:560px;margin:0 auto;padding:20px 18px}
+.sheet h3{margin:0 0 4px;font-size:26px;line-height:1.15}
+.sheet .lead{margin:0 0 14px;color:var(--mute);font-size:15px}
+.sheet h4{margin:20px 0 8px;font-size:17px;padding-top:14px;border-top:1px solid #e8e8e8}
+.field{margin-bottom:12px}
+.field>label{display:block;font-weight:600;font-size:15px;margin-bottom:4px}
+.field input[type=text],.field textarea{width:100%;padding:11px;border:1px solid #cfcfcf;border-radius:8px;font-size:16px;color:var(--ink);background:#fff}
+.field textarea{min-height:90px;font-size:13px;font-family:ui-monospace,Menlo,monospace}
+.sw{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.sw button{width:36px;height:36px;border-radius:50%;border:2px solid #fff;box-shadow:0 0 0 1px #bbb;cursor:pointer;padding:0}
+.sw button[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.sw input[type=color]{width:44px;height:36px;border:1px solid #ccc;border-radius:8px;padding:2px;background:#fff}
+.chk{display:flex;gap:10px;align-items:flex-start;margin:8px 0;font-size:16px}
+.chk input{width:22px;height:22px;margin:1px 0 0;flex:none;accent-color:var(--accent)}
+.lp{display:flex;gap:12px;align-items:center;margin-top:8px}
+.lp .pv{background:repeating-conic-gradient(#eee 0 25%,#fff 0 50%) 0 0/14px 14px;border:1px solid #ddd;border-radius:10px;min-width:70px;min-height:56px;display:flex;align-items:center;justify-content:center;padding:6px}
+.lp img{max-height:52px;max-width:120px;display:block}
+.msg{color:var(--warn);font-size:14px;min-height:1.2em;margin-top:6px}
+.note{color:var(--mute);font-size:14px;margin:6px 0 0}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+.iconpv{width:96px;height:96px;border-radius:22px;display:block;margin-top:8px;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+#modal{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:90;display:flex;align-items:center;justify-content:center;padding:20px}
+#modal .box{background:#fff;border-radius:14px;padding:20px;max-width:360px;width:100%}
+#modal p{margin:0 0 16px;font-size:17px}
+#modal .acts{justify-content:flex-end;margin:0}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div id="splash" hidden></div>
+<header class="top">
+  <div><h1>Sjekkliste</h1><p id="sub" hidden></p></div>
+  <div class="right"><div class="logo" id="hlogo" hidden></div>
+  <button class="burger" id="burger" aria-label="Meny" aria-expanded="false" aria-controls="menu"><span></span><span></span><span></span></button></div>
+</header>
+<div class="scrim" id="scrim"></div>
+<nav id="menu" aria-label="Lister"></nav>
+<main id="content"></main>
+<div class="wrap" id="sheetwrap" hidden><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+<div id="modal" hidden><div class="box"><p id="mtext"></p><div class="acts"><button class="btn ghost" id="mno">Avbryt</button><button class="btn danger" id="myes">OK</button></div></div></div>
+<script>
+(function(){
+'use strict';
+var KEY='sjekkliste-app-v1';
+function $(id){return document.getElementById(id)}
+function uid(){return Math.random().toString(36).slice(2,10)}
+function el(t,c,x){var e=document.createElement(t);if(c)e.className=c;if(x!=null)e.textContent=x;return e}
+function G(t,items){return{id:uid(),title:t,items:items.map(function(x){return{id:uid(),t:x}})}}
+function L(n,small,groups){return{id:uid(),name:n,small:small,groups:groups}}
+
+function template(){return[
+L('Før avgang',false,[
+ G('Før du drar hjemmefra',['Båtnøkkel','Sjekk værmeldingen','Medisiner','Solkrem','Mat og drikke']),
+ G('Under dekk',['Slå på batteribryteren','Sjekk at kjølsvinet er tørt','Åpne bunnventilene','Sjekk motorolje og kjølevæske','Sjekk drivstoffnivå','Sjekk at det ikke lukter gass under dekk']),
+ G('Før du legger fra kai',['Sjekk vind- og værmelding','Si fra til noen på land om planen og når du er tilbake','Sjekk drivstoff- og vannnivå','Gå gjennom sikkerhetsutstyr og roller med mannskapet']),
+ G('På dekk og i rigg',['Se over rigg, vant og skjøter','Redningsvester og sikkerhetsliner innen rekkevidde','Sjekk VHF og kartplotter','Navigasjonslysene fungerer','Mann-over-bord-utstyr er klart']),
+ G('Legge fra',['Koble fra landstrøm og stuv kabelen','Start motoren og kontroller at kjølevann kommer ut av eksosen','Ta inn fendere og ekstra tauverk','Se deg rundt og legg fra'])]),
+L('Seiling',false,[
+ G('Før du setter seil',['Sjekk vind og bølger mot det mannskapet er komfortabelt med','Vurder å reve før du trenger det','Gjør klart skjøter og fall uten floker','Avtal roller og kommandoer med mannskapet','Fendere inn når båten forlater havn']),
+ G('Under seilas',['Hold utkikk hele veien rundt','Følg med på kurs, posisjon og dybde','Sjekk rigg og seil jevnlig for slitasje og slark','Sjekk kjølsvinet og batterispenningen av og til','Før logg over posisjon og vær']),
+ G('Når vinden øker',['Ta ned eller reve seilene i god tid','Fest løst utstyr på dekk og under dekk','Sjekk at luker er stengt','Redningsvester og sikkerhetsliner på, MOB-utstyr klart'])]),
+L('Mot havn',false,[
+ G('Mot havn',['Avtal roller og plan med mannskapet','Sjekk vind og strøm mot kaia','Berg seilene i god tid','Fendere ut','Avpass farten i god tid','Gjør klart til fortøyning: trosser og spring klare','Ha styrefart'])]),
+L('Forlate båten',false,[
+ G('Fortøyd ved kaia',['Motor av','Akter- og baugtrosse + spring','Fendere i riktig høyde','Koble til landstrøm']),
+ G('Seil og dekk',['Rull inn eller legg sammen seilene og ta på trekk','Fest fallene så de ikke slår mot masta','Lukk og lås lukene','Stuv puter og løst utstyr']),
+ G('Under dekk',['Steng gasskranen','Steng bunnventilene','Sjekk at kjølsvinet er tørt','Tøm søppel og kjøleskap','Slå av batterier og instrumenter']),
+ G('Før du går fra båten',['Sjekk status på batterier','Ta med verdisaker','Ta en siste titt på fortøyningene'])]),
+L('Ankring',true,[
+ G('Før du ankrer',['Velg en plass med le og nok rom til å svaie','Sjekk dybde og bunntype i kartet','Gjør klart anker og kjetting så de går fritt']),
+ G('Når du legger ut ankeret',['Stopp båten med baugen mot vinden','Fire ut kjetting jevnt mens du går sakte bakover','Huskeregel: minst tre ganger dybden i kjetting/tau, mer i vind','Gå sakte bakover med motor og sjekk at ankeret tar tak']),
+ G('Når ankeret ligger',['Ta peiling mot to faste punkter','Sett ankeralarm hvis du har det','Ankerlys på om natten','Sjekk posisjonen igjen ved vindskifte']),
+ G('Når du tar opp ankeret',['Start motoren og sjekk at propellen er fri','Kjør sakte frem mens du tar inn kjettingen','Fest ankeret godt før du kjører videre'])]),
+L('Ny sesong',true,[
+ G('Skrog og dekk',['Se over skrog og gelcoat for skader','Sjekk bunnstoff og anoder','Sjekk propell og drev eller aksel','Sjekk at roret og rorsystemet går lett','Sjekk bunnventiler og slanger']),
+ G('Rigg og seil',['Se over mast, vant og stag for slitasje og sprekker','Sjekk at splinter og låsepinner sitter','Se over seil og sømmer','Bytt slitt tauverk, skjøter og fall']),
+ G('Motor og systemer',['Skift motorolje og filtre hvis det ikke ble gjort før vinteren','Sjekk drivstofffilter og drivstoff','Sjekk reimer og kjølevannspumpa','Lad og sjekk batterier og tilkoblinger','Test lensepumpa','Fyll og skyll ferskvannstanken']),
+ G('Gass og sikkerhet',['Sjekk gasslanger og koblinger for sprekker og lekkasje','Test gassalarmen hvis du har en','Sjekk dato og trykk på redningsvester, brannslokker og nødsignaler','Test VHF, navigasjonslys og ankerlys','Fyll opp førstehjelpsutstyret'])]),
+L('Vinterlagring',true,[
+ G('Motor',['Varm opp motoren og skift olje og filtre','Fyll drivstofftanken eller tilsett stabilisator','Frostsikre kjølesystemet etter motorens bruksanvisning']),
+ G('Vann og systemer',['Tøm ferskvannstank, slanger og varmtvannsbereder','Tøm toalett og sjøvannsslanger','Tøm sjøvannsslanger og bunnventiler for vann hvis båten står på land']),
+ G('Gass og elektrisk',['Steng og koble fra gassflasken, og lagre den trygt etter lokale regler','Ta ut batteriene og lad dem, eller koble fra og vedlikeholdslad','Ta med elektronikk og verdisaker hjem']),
+ G('Seil og interiør',['Ta ned seilene, tørk dem og lagre dem tørt','Ta ned og tørk løst tauverk, skjøter og fall','Ta med puter, tepper og klær hjem eller lagre dem tørt','Tøm kjøleskap og skap, og la dem stå åpne for luft','Rengjør og tørk båten innvendig']),
+ G('Dekk og presenning',['Vask skrog, dekk og cockpit','Sett på vinterpresenning med god ventilasjon under','Sjekk at støttene eller vuggen står stabilt, eller at fortøyningene er doblet hvis båten ligger i vannet'])])
+]}
+
+var SWATCHES=['#c8102e','#0f4c68','#1b7f5c','#e08a00','#6a3fa0','#2e3236','#d6336c','#0a7fa8'];
+var BGS=['#f3ede1','#ffffff','#eef0f2','#e6eef3','#e8efe6'];
+var HEX=/^#[0-9a-f]{6}$/i;
+
+function defaults(){return{v:1,setup:false,boat:{name:'',model:''},theme:{accent:'#c8102e',bg:'#f3ede1'},logo:null,
+ settings:{resetOnOpen:true,splash:true,doneMsg:'Ship shape. God tur!'},lists:template(),checked:{}}}
+
+function str(v,max){return typeof v==='string'?v.slice(0,max):''}
+function sanitize(o){
+ try{
+  if(!o||typeof o!=='object'||!Array.isArray(o.lists))return null;
+  var d=defaults(),r=d;
+  r.setup=true;
+  r.boat.name=str(o.boat&&o.boat.name,60);r.boat.model=str(o.boat&&o.boat.model,60);
+  if(o.theme){if(HEX.test(o.theme.accent))r.theme.accent=o.theme.accent;if(HEX.test(o.theme.bg))r.theme.bg=o.theme.bg}
+  r.logo=(typeof o.logo==='string'&&o.logo.indexOf('data:image/')===0&&o.logo.length<900000)?o.logo:null;
+  if(o.settings){r.settings.resetOnOpen=o.settings.resetOnOpen!==false;r.settings.splash=o.settings.splash!==false;
+   var m=str(o.settings.doneMsg,60);if(m)r.settings.doneMsg=m}
+  r.lists=o.lists.slice(0,30).map(function(l){
+   return{id:uid(),name:str(l&&l.name,60),small:!!(l&&l.small),groups:(Array.isArray(l&&l.groups)?l.groups:[]).slice(0,30).map(function(g){
+    return{id:uid(),title:str(g&&g.title,80),items:(Array.isArray(g&&g.items)?g.items:[]).slice(0,80).map(function(i){return{id:uid(),t:str(i&&i.t,200)}})}})}});
+  r.checked={};
+  return r;
+ }catch(e){return null}
+}
+function load(){
+ var s=null;
+ try{var raw=localStorage.getItem(KEY);if(raw){s=JSON.parse(raw)}}catch(e){}
+ if(s&&s.lists){
+  var r=sanitize(s);
+  if(r){ // keep list/item ids from storage so checks survive
+   r.setup=s.setup!==false;r.lists=s.lists;r.checked=(s.checked&&typeof s.checked==='object')?s.checked:{};
+   if(r.settings.resetOnOpen)r.checked={};
+   return r;
+  }
+ }
+ return defaults();
+}
+var st=load();
+var cur=st.lists[0]?st.lists[0].id:null;
+var editing=false;
+var FULL={};
+var logoImg=null;
+var saveT=null;
+
+function save(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
+function saveSoon(){clearTimeout(saveT);saveT=setTimeout(function(){save();updateIcon()},400)}
+window.addEventListener('pagehide',save);
+
+/* ---------- colour helpers ---------- */
+function rgb(h){return[1,3,5].map(function(i){return parseInt(h.substr(i,2),16)})}
+function lum(h){var c=rgb(h).map(function(v){v/=255;return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4)});return .2126*c[0]+.7152*c[1]+.0722*c[2]}
+function onColor(h){return lum(h)>.22?'#1d1d1f':'#ffffff'}
+function shade(h,f){return'#'+rgb(h).map(function(v){var x=Math.max(0,Math.min(255,Math.round(v*f)));return(x<16?'0':'')+x.toString(16)}).join('')}
+function ctr(a,b){var x=lum(a),y=lum(b),h=Math.max(x,y),l=Math.min(x,y);return(h+.05)/(l+.05)}
+function readable(a,bg){var c=a,i=0;while(ctr(c,bg)<4.5&&i<25){c=shade(c,.9);i++}return c}
+function applyTheme(){
+ var r=document.documentElement.style,a=st.theme.accent,b=st.theme.bg;
+ r.setProperty('--accent',a);r.setProperty('--atext',readable(a,b));r.setProperty('--on',onColor(a));r.setProperty('--bg',b);r.setProperty('--line',shade(b,.88));
+ $('themecolor').setAttribute('content',a);
+}
+
+/* ---------- header, splash, icon ---------- */
+function renderHeader(){
+ var t=[st.boat.name,st.boat.model].filter(Boolean).join(' – ');
+ var p=$('sub');p.hidden=!t;p.textContent=t;
+ var lg=$('hlogo');lg.textContent='';
+ if(st.logo){var im=el('img');im.alt='Logo';im.src=st.logo;lg.appendChild(im);lg.hidden=false}else lg.hidden=true;
+ document.title=st.boat.name?('Sjekkliste – '+st.boat.name):'Båtsjekkliste';
+ logoImg=null;if(st.logo){logoImg=new Image();logoImg.onload=updateIcon;logoImg.src=st.logo}
+ updateIcon();
+}
+function rr(c,x,y,w,h,r){c.beginPath();c.moveTo(x+r,y);c.arcTo(x+w,y,x+w,y+h,r);c.arcTo(x+w,y+h,x,y+h,r);c.arcTo(x,y+h,x,y,r);c.arcTo(x,y,x+w,y,r);c.closePath()}
+function makeIcon(n){
+ var cv=document.createElement('canvas');cv.width=cv.height=n;var c=cv.getContext('2d');
+ c.fillStyle=st.theme.accent;c.fillRect(0,0,n,n);
+ if(logoImg&&logoImg.complete&&logoImg.naturalWidth){
+  var pad=n*.14;c.fillStyle='#fff';rr(c,pad,pad,n-2*pad,n-2*pad,n*.16);c.fill();
+  var iw=n-2*pad-n*.12,ih=iw,s=Math.min(iw/logoImg.naturalWidth,ih/logoImg.naturalHeight),w=logoImg.naturalWidth*s,h=logoImg.naturalHeight*s;
+  c.drawImage(logoImg,(n-w)/2,(n-h)/2,w,h);
+ }else{
+  var words=(st.boat.name||'Båt').replace(/[^\wÆØÅæøå ]/g,' ').trim().split(/\s+/).filter(Boolean);
+  var ini=(words.length>1?words[0][0]+words[1][0]:(words[0]||'B').slice(0,2)).toUpperCase();
+  c.fillStyle=onColor(st.theme.accent);c.font='700 '+Math.round(n*.42)+'px Jost,Futura,sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(ini,n/2,n/2+n*.03);
+ }
+ return cv;
+}
+function updateIcon(){try{$('touchicon').setAttribute('href',makeIcon(180).toDataURL('image/png'))}catch(e){}}
+function showSplash(){
+ var s=$('splash');s.textContent='';var inn=el('div','in');
+ if(st.logo){var cd=el('div','card'),im=el('img');im.alt=st.boat.name||'Logo';im.src=st.logo;cd.appendChild(im);inn.appendChild(cd)}
+ else inn.appendChild(el('div','nm',st.boat.name||'Sjekkliste'));
+ if(st.logo&&st.boat.name)inn.appendChild(el('div','nm',st.boat.name));
+ if(st.boat.model)inn.appendChild(el('div','md',st.boat.model));
+ s.appendChild(inn);s.hidden=false;s.classList.remove('out');
+ function out(){s.classList.add('out');setTimeout(function(){s.hidden=true},800)}
+ s.onclick=out;setTimeout(out,3000);
+}
+
+/* ---------- confirm modal ---------- */
+function ask(text,ok){
+ return new Promise(function(res){
+  $('mtext').textContent=text;$('myes').textContent=ok||'OK';$('modal').hidden=false;
+  function done(v){$('modal').hidden=true;$('myes').onclick=$('mno').onclick=null;res(v)}
+  $('myes').onclick=function(){done(true)};$('mno').onclick=function(){done(false)};
+ });
+}
+
+/* ---------- menu ---------- */
+function curList(){for(var i=0;i<st.lists.length;i++)if(st.lists[i].id===cur)return st.lists[i];return st.lists[0]||null}
+function openMenu(o){$('menu').classList.toggle('open',o);$('scrim').classList.toggle('open',o);$('burger').setAttribute('aria-expanded',o)}
+function renderMenu(){
+ var m=$('menu');m.textContent='';var c=curList();
+ st.lists.forEach(function(l){
+  var b=el('button','tab'+(l.small?' sm':''),l.name||'Uten navn');b.setAttribute('aria-selected',c&&l.id===c.id);
+  b.onclick=function(){cur=l.id;openMenu(false);render();window.scrollTo(0,0)};m.appendChild(b)});
+ m.appendChild(el('div','msep'));
+ var e=el('button','mact',editing?'Ferdig med redigering':'Rediger lister');e.onclick=function(){editing=!editing;openMenu(false);render();window.scrollTo(0,0)};m.appendChild(e);
+ if(editing){var n=el('button','mact','+ Ny liste');n.onclick=function(){var l=L('Ny liste',false,[G('Ny avdeling',[''])]);st.lists.push(l);cur=l.id;save();openMenu(false);render(l.id+'-name');window.scrollTo(0,0)};m.appendChild(n)}
+ var s=el('button','mact','Innstillinger');s.onclick=function(){openMenu(false);openSheet(false)};m.appendChild(s);
+}
+
+/* ---------- main ---------- */
+function counts(l){var t=0,d=0;l.groups.forEach(function(g){g.items.forEach(function(i){if(i.t.trim()){t++;if(st.checked[i.id])d++}})});return{t:t,d:d}}
+function progress(p){var w=el('div','prog'+(p===100?' full':'')),f=el('i');f.style.width=p+'%';w.appendChild(f);return w}
+var pendingFocus=null;
+function render(focusId){
+ applyTheme();renderMenu();renderMain();
+ var f=focusId||pendingFocus;pendingFocus=null;
+ if(f){var n=document.querySelector('[data-f="'+f+'"]');if(n){n.focus();if(n.select)n.select()}}
+}
+function renderMain(){
+ var main=$('content');main.textContent='';var l=curList();
+ if(!l){var e=el('div','empty');e.appendChild(el('p',null,'Du har ingen lister ennå.'));
+  var b=el('button','btn','+ Ny liste');b.onclick=function(){var nl=L('Ny liste',false,[G('Ny avdeling',[''])]);st.lists.push(nl);cur=nl.id;editing=true;save();render(nl.id+'-name')};e.appendChild(b);main.appendChild(e);return}
+ if(editing){renderEdit(l,main);return}
+ main.appendChild(el('div','curname',l.name||'Uten navn'));
+ var c=counts(l),p=c.t?Math.round(c.d/c.t*100):0;
+ if(!c.t){var em=el('div','empty');em.appendChild(el('p',null,'Denne listen er tom.'));var eb=el('button','btn','Legg til punkter');eb.onclick=function(){editing=true;render();window.scrollTo(0,0)};em.appendChild(eb);main.appendChild(em);return}
+ main.appendChild(progress(p));
+ var ct=el('div','count');ct.appendChild(el('span',null,c.d+' av '+c.t+' ferdig'));ct.appendChild(el('span',null,p+'%'));main.appendChild(ct);
+ if(c.t&&c.d===c.t)main.appendChild(el('div','done-msg',st.settings.doneMsg));
+ l.groups.forEach(function(g){
+  var items=g.items.filter(function(i){return i.t.trim()});if(!items.length)return;
+  var sec=el('section');sec.appendChild(el('h2',null,g.title||' '));
+  var gd=0;items.forEach(function(i){if(st.checked[i.id])gd++});
+  var gpc=Math.round(gd/items.length*100),gp=el('div','gp'+(gpc===100?' full':'')),gf=el('i');gf.style.width=gpc+'%';gp.appendChild(gf);sec.appendChild(gp);
+  var fk=l.id+'-'+g.id,ci=0;
+  items.forEach(function(it){
+   var row=el('div','item'),lab=el('label'),cb=el('input');cb.type='checkbox';cb.checked=!!st.checked[it.id];cb.style.animationDelay=(ci++*70)+'ms';
+   cb.onchange=function(){if(cb.checked)st.checked[it.id]=true;else delete st.checked[it.id];save();render()};
+   lab.appendChild(cb);lab.appendChild(el('span',null,it.t));row.appendChild(lab);sec.appendChild(row)});
+  if(gpc===100){sec.className='full'+(FULL[fk]?'':' pop');FULL[fk]=1}else delete FULL[fk];
+  main.appendChild(sec)});
+ if(c.t&&c.d===c.t)main.appendChild(el('div','done-msg',st.settings.doneMsg));
+ var bp=progress(p);bp.style.marginBottom='12px';main.appendChild(bp);
+}
+
+/* ---------- edit mode ---------- */
+function mv(arr,i,d){var j=i+d;if(j<0||j>=arr.length)return false;var t=arr[i];arr[i]=arr[j];arr[j]=t;return true}
+function ib(txt,label,fn,dis,cls){var b=el('button','ib'+(cls?' '+cls:''),txt);b.setAttribute('aria-label',label);b.disabled=!!dis;b.onclick=fn;return b}
+function renderEdit(l,main){
+ var bar=el('div','edbar'),bp=el('p',null,'Du redigerer. Endringer lagres automatisk.');bar.appendChild(bp);
+ var done=el('button','btn','Ferdig');done.onclick=function(){editing=false;render();window.scrollTo(0,0)};bar.appendChild(done);main.appendChild(bar);
+ /* list tools */
+ var tl=el('section','tools');
+ var nm=el('input');nm.type='text';nm.value=l.name;nm.maxLength=60;nm.setAttribute('aria-label','Navn på listen');nm.setAttribute('data-f',l.id+'-name');nm.style.cssText='padding:10px;border:1px solid var(--line);border-radius:8px;font-size:20px;font-weight:700;width:100%;color:var(--ink)';
+ nm.oninput=function(){l.name=nm.value;saveSoon();renderMenu()};tl.appendChild(nm);
+ var lb=el('label','t'),sc=el('input');sc.type='checkbox';sc.checked=!!l.small;sc.style.cssText='width:22px;height:22px;accent-color:var(--accent)';
+ sc.onchange=function(){l.small=sc.checked;save();renderMenu()};lb.appendChild(sc);lb.appendChild(el('span',null,'Vis liten i menyen (sjelden brukt)'));tl.appendChild(lb);
+ var row=el('div','row'),idx=st.lists.indexOf(l);
+ row.appendChild(ib('↑','Flytt listen opp i menyen',function(){if(mv(st.lists,idx,-1)){save();render()}},idx===0));
+ row.appendChild(ib('↓','Flytt listen ned i menyen',function(){if(mv(st.lists,idx,1)){save();render()}},idx===st.lists.length-1));
+ var dl=el('button','btn danger','Slett listen');dl.onclick=function(){ask('Slette «'+(l.name||'Uten navn')+'» med alle avdelinger og punkter?','Slett').then(function(y){if(!y)return;st.lists.splice(idx,1);cur=st.lists[0]?st.lists[0].id:null;save();render()})};
+ row.appendChild(dl);tl.appendChild(row);main.appendChild(tl);
+ /* groups */
+ l.groups.forEach(function(g,gi){
+  var sec=el('section'),eh=el('div','eh'),gt=el('input');gt.type='text';gt.value=g.title;gt.maxLength=80;gt.placeholder='Navn på avdeling';gt.setAttribute('aria-label','Navn på avdeling');gt.setAttribute('data-f',g.id+'-t');
+  gt.oninput=function(){g.title=gt.value;saveSoon()};eh.appendChild(gt);
+  eh.appendChild(ib('↑','Flytt avdelingen opp',function(){if(mv(l.groups,gi,-1)){save();render()}},gi===0));
+  eh.appendChild(ib('↓','Flytt avdelingen ned',function(){if(mv(l.groups,gi,1)){save();render()}},gi===l.groups.length-1));
+  eh.appendChild(ib('×','Slett avdelingen',function(){ask('Slette avdelingen «'+(g.title||'Uten navn')+'»?','Slett').then(function(y){if(!y)return;l.groups.splice(gi,1);save();render()})},false,'del'));
+  sec.appendChild(eh);
+  g.items.forEach(function(it,ii){
+   var r=el('div','er'),inp=el('input');inp.type='text';inp.value=it.t;inp.maxLength=200;inp.placeholder='Skriv et punkt';inp.setAttribute('aria-label','Punkt');inp.setAttribute('data-f',it.id);
+   inp.oninput=function(){it.t=inp.value;saveSoon()};
+   inp.onkeydown=function(e){if(e.key==='Enter'){e.preventDefault();var ni={id:uid(),t:''};g.items.splice(ii+1,0,ni);save();render(ni.id)}};
+   r.appendChild(inp);
+   r.appendChild(ib('↑','Flytt punktet opp',function(){if(mv(g.items,ii,-1)){save();render(it.id)}},ii===0));
+   r.appendChild(ib('↓','Flytt punktet ned',function(){if(mv(g.items,ii,1)){save();render(it.id)}},ii===g.items.length-1));
+   r.appendChild(ib('×','Slett punktet',function(){g.items.splice(ii,1);delete st.checked[it.id];save();render()},false,'del'));
+   sec.appendChild(r)});
+  var ad=el('div','eadd'),ab=el('button','btn ghost block','+ Legg til punkt');
+  ab.onclick=function(){var ni={id:uid(),t:''};g.items.push(ni);save();render(ni.id)};ad.appendChild(ab);sec.appendChild(ad);
+  main.appendChild(sec)});
+ var ng=el('button','btn block','+ Ny avdeling');ng.onclick=function(){var g=G('Ny avdeling',['']);l.groups.push(g);save();render(g.id+'-t')};main.appendChild(ng);
+}
+
+/* ---------- settings / first-run sheet ---------- */
+var first=false,tplChoice='sail';
+function field(label,node,note){var f=el('div','field');if(label){var lb=el('label',null,label);f.appendChild(lb)}f.appendChild(node);if(note)f.appendChild(el('p','note',note));return f}
+function textInput(val,ph,max,fn){var i=el('input');i.type='text';i.value=val;i.placeholder=ph||'';i.maxLength=max;i.autocomplete='off';i.oninput=function(){fn(i.value)};return i}
+function swatchRow(list,get,set,onCustom){
+ var w=el('div','sw'),btns=[];
+ var ci=el('input');ci.type='color';ci.value=get();ci.setAttribute('aria-label','Egen farge');
+ function sync(){var v=get().toLowerCase();btns.forEach(function(b){b.setAttribute('aria-pressed',b.dataset.c===v)});ci.value=get()}
+ list.forEach(function(c){var b=el('button');b.type='button';b.style.background=c;b.dataset.c=c.toLowerCase();b.setAttribute('aria-label','Velg farge '+c);b.onclick=function(){set(c);sync()};btns.push(b);w.appendChild(b)});
+ ci.oninput=function(){set(ci.value);sync()};w.appendChild(ci);sync();return w;
+}
+function fileBtn(label,accept,aria,onfile,cls){
+ var w=el('label','btn '+(cls||'ghost'),label);w.style.display='inline-block';w.style.cursor='pointer';
+ var i=el('input');i.type='file';i.accept=accept;i.setAttribute('aria-label',aria);i.style.cssText='position:absolute;width:1px;height:1px;opacity:0;overflow:hidden';
+ i.onchange=function(){var f=i.files&&i.files[0];i.value='';if(f)onfile(f)};
+ w.appendChild(i);i.addEventListener('focus',function(){w.style.outline='3px solid var(--accent)';w.style.outlineOffset='2px'});i.addEventListener('blur',function(){w.style.outline=''});
+ return w}
+function download(name,text,type){
+ try{var b=new Blob([text],{type:type||'application/json'}),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=name;document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},2000)}catch(e){}
+}
+function exportObj(){return{app:'sjekkliste',v:1,boat:st.boat,theme:st.theme,logo:st.logo,settings:st.settings,lists:st.lists.map(function(l){return{name:l.name,small:!!l.small,groups:l.groups.map(function(g){return{title:g.title,items:g.items.filter(function(i){return i.t.trim()}).map(function(i){return{t:i.t}})}})}})}}
+
+function processLogo(file,msg,after){
+ msg.textContent='';
+ if(!file)return;
+ if(!/^image\//.test(file.type)){msg.textContent='Velg en bildefil (PNG, JPG eller SVG).';return}
+ if(file.size>15e6){msg.textContent='Bildet er for stort. Velg et bilde under 15 MB.';return}
+ var fr=new FileReader();
+ fr.onerror=function(){msg.textContent='Kunne ikke lese filen.'};
+ fr.onload=function(){
+  var im=new Image();
+  im.onerror=function(){msg.textContent='Kunne ikke åpne bildet. Prøv PNG eller JPG.'};
+  im.onload=function(){
+   var mx=600,w=im.naturalWidth||mx,h=im.naturalHeight||mx,s=Math.min(1,mx/Math.max(w,h));
+   if(!im.naturalWidth){w=h=mx;s=1}
+   var cv=document.createElement('canvas');cv.width=Math.max(1,Math.round(w*s));cv.height=Math.max(1,Math.round(h*s));
+   cv.getContext('2d').drawImage(im,0,0,cv.width,cv.height);
+   var out=cv.toDataURL('image/png');
+   if(out.length>800000){out=cv.toDataURL('image/jpeg',.85)}
+   if(out.length>800000){msg.textContent='Logoen er for detaljert. Prøv et enklere bilde.';return}
+   st.logo=out;save();renderHeader();after()};
+  im.src=fr.result};
+ fr.readAsDataURL(file);
+}
+
+function renderSheet(){
+ var sh=$('sheet');sh.textContent='';
+ sh.appendChild(el('h3',null,first?'Sett opp båten din':'Innstillinger'));
+ sh.appendChild(el('p','lead',first?'Dette tar et minutt. Du kan endre alt senere under Innstillinger.':'Endringer lagres automatisk.'));
+ var nm=textInput(st.boat.name,'F.eks. S/Y Julie',60,function(v){st.boat.name=v;renderHeader();saveSoon()});
+ sh.appendChild(field('Båtnavn',nm));
+ sh.appendChild(field('Type eller modell',textInput(st.boat.model,'F.eks. Wauquiez Gladiateur 33',60,function(v){st.boat.model=v;renderHeader();saveSoon()})));
+ sh.appendChild(el('h4',null,'Utseende'));
+ sh.appendChild(field('Hovedfarge',swatchRow(SWATCHES,function(){return st.theme.accent},function(c){st.theme.accent=c;applyTheme();renderMain();saveSoon();updatePv()}),'Brukes i tittellinjen, knapper og fremdrift. Teksten tilpasser seg automatisk.'));
+ sh.appendChild(field('Bakgrunn',swatchRow(BGS,function(){return st.theme.bg},function(c){st.theme.bg=c;applyTheme();saveSoon()})));
+ var lp=el('div','lp'),pv=el('div','pv'),msg=el('p','msg');msg.setAttribute('role','status');
+ function paintLogo(){pv.textContent='';if(st.logo){var im=el('img');im.alt='Logo';im.src=st.logo;pv.appendChild(im)}else pv.appendChild(el('span','note','Ingen logo'));rm.hidden=!st.logo}
+ var fi=fileBtn('Velg logo…','image/*','Velg logo',function(f){processLogo(f,msg,function(){paintLogo();updatePv()})});
+ var rm=el('button','btn ghost','Fjern logo');rm.type='button';rm.style.marginLeft='8px';rm.onclick=function(){st.logo=null;save();renderHeader();paintLogo();updatePv()};
+ var lw=el('div');lw.appendChild(fi);lw.appendChild(rm);lp.appendChild(pv);lp.appendChild(lw);
+ var lf=field('Logo',lp,'PNG med gjennomsiktig bakgrunn fungerer best. Logoen vises på hvit bakgrunn i tittellinjen.');lf.appendChild(msg);sh.appendChild(lf);
+ sh.appendChild(el('h4',null,'Oppførsel'));
+ function chk(label,get,set){var w=el('label','chk'),i=el('input');i.type='checkbox';i.checked=get();i.onchange=function(){set(i.checked);save()};w.appendChild(i);w.appendChild(el('span',null,label));return w}
+ sh.appendChild(chk('Nullstill avkrysninger hver gang appen åpnes',function(){return st.settings.resetOnOpen},function(v){st.settings.resetOnOpen=v}));
+ sh.appendChild(chk('Vis åpningsskjerm med logo og navn',function(){return st.settings.splash},function(v){st.settings.splash=v}));
+ sh.appendChild(field('Melding når en liste er ferdig',textInput(st.settings.doneMsg,'Ship shape. God tur!',60,function(v){st.settings.doneMsg=v||'Ferdig!';saveSoon()})));
+ if(first){
+  sh.appendChild(el('h4',null,'Start med'));
+  [['sail','Seilbåt-mal','Ferdige lister for avgang, seiling, havn, ankring, ny sesong og vinterlagring. Du kan endre alt.'],['empty','Tom app','Du lager listene selv.']].forEach(function(o){
+   var w=el('label','chk'),r=el('input');r.type='radio';r.name='tpl';r.checked=tplChoice===o[0];r.onchange=function(){tplChoice=o[0]};w.appendChild(r);
+   var s=el('span');s.appendChild(el('strong',null,o[1]));s.appendChild(el('br'));s.appendChild(el('span','note',o[2]));w.appendChild(s);sh.appendChild(w)});
+  var go=el('button','btn block','Kom i gang');go.style.marginTop='16px';
+  go.onclick=function(){
+   st.setup=true;
+   if(tplChoice==='empty'){var l=L('Min første liste',false,[G('Avdeling 1',[''])]);st.lists=[l];cur=l.id;editing=true}
+   else{st.lists=template();cur=st.lists[0].id}
+   save();$('sheetwrap').hidden=true;renderHeader();render();window.scrollTo(0,0);
+  };sh.appendChild(go);return;
+ }
+ /* app icon */
+ sh.appendChild(el('h4',null,'Appikon'));
+ var ipv=el('img','iconpv');ipv.alt='Appikon';
+ function updatePv(){try{ipv.src=makeIcon(180).toDataURL('image/png')}catch(e){}}
+ updatePv();sh.appendChild(ipv);
+ sh.appendChild(el('p','note','Ikonet lages av hovedfarge og logo. Legg siden på hjem-skjermen fra delemenyen i Safari. Du kan også laste ned ikonet og bruke det i Snarveier-appen.'));
+ var ia=el('div','acts'),idl=el('button','btn ghost','Last ned ikon (PNG)');idl.onclick=function(){try{makeIcon(1024).toBlob(function(b){var u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download='appikon.png';document.body.appendChild(a);a.click();document.body.removeChild(a);setTimeout(function(){URL.revokeObjectURL(u)},2000)})}catch(e){}};
+ ia.appendChild(idl);sh.appendChild(ia);
+ /* backup */
+ sh.appendChild(el('h4',null,'Sikkerhetskopi og deling'));
+ sh.appendChild(el('p','note','Listene dine ligger kun på denne enheten. Lag en kopi for å flytte dem til en annen telefon eller dele malen med en venn.'));
+ var ta=el('textarea');ta.setAttribute('aria-label','Sikkerhetskopi som tekst');ta.placeholder='Trykk «Lag kopi» for å vise teksten her, eller lim inn en kopi du har fått og trykk «Bruk denne kopien».';
+ var ba=el('div','acts'),be=el('button','btn ghost','Lag kopi'),bd=el('button','btn ghost','Last ned fil'),bc=el('button','btn ghost','Kopier tekst'),bi=el('button','btn ghost','Bruk denne kopien');
+ var bm=el('p','msg');bm.setAttribute('role','status');
+ be.onclick=function(){ta.value=JSON.stringify(exportObj());bm.textContent=''};
+ bd.onclick=function(){var t=JSON.stringify(exportObj(),null,1);ta.value=t;download('sjekkliste-'+((st.boat.name||'bat').replace(/[^\w-]+/g,'-'))+'.json',t)};
+ bc.onclick=function(){if(!ta.value)ta.value=JSON.stringify(exportObj());try{ta.select();navigator.clipboard.writeText(ta.value).then(function(){bm.style.color='var(--done)';bm.textContent='Kopiert.'},function(){bm.style.color='var(--warn)';bm.textContent='Kunne ikke kopiere. Marker teksten og kopier selv.'})}catch(e){bm.textContent='Marker teksten og kopier selv.'}};
+ function importText(t){
+  var o;try{o=JSON.parse(t)}catch(e){bm.style.color='var(--warn)';bm.textContent='Teksten er ikke en gyldig kopi.';return}
+  var r=sanitize(o);if(!r){bm.style.color='var(--warn)';bm.textContent='Fant ingen lister i kopien.';return}
+  ask('Erstatte alle lister, farger og logo med innholdet i kopien?','Erstatt').then(function(y){if(!y)return;st=r;cur=st.lists[0]?st.lists[0].id:null;editing=false;save();applyTheme();renderHeader();render();renderSheet()})
+ }
+ bi.onclick=function(){if(!ta.value.trim()){bm.style.color='var(--warn)';bm.textContent='Lim inn en kopi først.';return}importText(ta.value)};
+ ba.appendChild(be);ba.appendChild(bd);ba.appendChild(bc);sh.appendChild(ta);sh.appendChild(ba);
+ var fi2=fileBtn('Velg kopi-fil…','.json,application/json','Velg kopi-fil',function(f){var fr=new FileReader();fr.onload=function(){ta.value=String(fr.result).slice(0,2000000);importText(ta.value)};fr.readAsText(f)});
+ var ia2=el('div','acts');ia2.appendChild(bi);ia2.appendChild(fi2);sh.appendChild(ia2);sh.appendChild(bm);
+ sh.appendChild(el('h4',null,'Tilbakestill'));
+ var rs=el('button','btn danger block','Gå tilbake til startmalen for seilbåt');
+ rs.onclick=function(){ask('Erstatte alle dine lister med startmalen? Dine egne endringer går tapt.','Tilbakestill').then(function(y){if(!y)return;st.lists=template();cur=st.lists[0].id;st.checked={};editing=false;save();render();renderSheet()})};
+ sh.appendChild(rs);
+ var cl=el('button','btn block','Ferdig');cl.style.marginTop='18px';cl.onclick=function(){save();$('sheetwrap').hidden=true;render()};sh.appendChild(cl);
+ paintLogo();
+}
+function openSheet(f){first=!!f;renderSheet();$('sheetwrap').hidden=false;$('sheetwrap').scrollTop=0}
+
+/* ---------- wiring ---------- */
+$('burger').onclick=function(){openMenu(this.getAttribute('aria-expanded')!=='true')};
+$('scrim').onclick=function(){openMenu(false)};
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){openMenu(false);if(!first&&!$('sheetwrap').hidden){save();$('sheetwrap').hidden=true;render()}}});
+
+applyTheme();renderHeader();render();
+if(!st.setup){openSheet(true)}
+else if(st.settings.splash){showSplash()}
+})();
+</script>
+</body>
+</html>
